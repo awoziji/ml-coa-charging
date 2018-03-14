@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>COA Charging</title>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='material.min.css') }}">
+	<script type="text/javascript" src="{{ url_for('static', filename='material.min.js') }}"></script>
+</head>
+<body>
+	<center>
+		<h1 class="mdl-typography--display-3">COA Charging</h1>
+
+		<form action="/predict" method="POST">
+			<div class="mdl-textfield mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+			    <textarea class="mdl-textfield__input" type="text" rows= "3" id="headerDescription" name="headerDescription"></textarea>
+			    <label class="mdl-textfield__label" for="headerDescription">Header Description</label>
+			</div>
+			<br>
+
+			<div class="mdl-textfield mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+			    <textarea class="mdl-textfield__input" type="text" rows= "3" id="lineDescription" name="lineDescription"></textarea>
+			    <label class="mdl-textfield__label" for="lineDescription">Line Description</label>
+			</div>
+			<br>
+            
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+			    <input class="mdl-textfield__input" type="text" id="vendorName" name="vendorName">
+	    		<label class="mdl-textfield__label" for="vendorName">Vendor Name</label>
+	    	</div>
+	    	<br>
+
+			<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+			    <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="amount" name="amount">
+	    		<label class="mdl-textfield__label" for="amount">Amount ($)</label>
+	    		<span class="mdl-textfield__error">Input is not a number!</span>
+	    	</div>
+	    	<br>
+
+			<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" type="submit">
+				Predict
+			</button>
+		</form>
+	</center>
+</body>
+
+</html>
