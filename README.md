@@ -33,3 +33,7 @@ The vendor names go through the same embedding layer and convolutional structure
 The invoice amounts just go through a batch normalisation layer.
 
 These "preprocessed" or feature extracted features are then concatenated together and fed to a softmax layer to generate the prediction.
+
+## Additional Details
+
+Material design files are put in the `static` folder because this application is meant to be deployed in an intranet environment. These files are only used in a simple web frontend meant for demo purposes. The frontend is strictly speaking not required to deploy the model into production; only the `predict` API is required.
