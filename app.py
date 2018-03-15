@@ -12,6 +12,9 @@ graph = tf.get_default_graph()
 
 with open('data/misc/tokenizer.pickle', 'rb') as f:
     tokenizer = pickle.load(f)
+# fix tokenizer has no attribute 'None' issue
+if not hasattr(tokenizer, 'oov_token'):
+    tokenizer.oov_token = None
 
 acc_mapping_df = pd.read_feather('data/misc/acc_mapping.feather')
 
