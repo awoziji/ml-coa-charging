@@ -73,4 +73,7 @@ def predict():
     })
 
 if __name__ == '__main__':
-    app.run(debug=os.getenv('FLASK_DEBUG', False))
+    # running on 0.0.0.0 will expose the app beyond localhost
+    # debug flag is set to False if deploying to production; on dev env 
+    # we can set FLASK_DEBUG to True for debugging purposes
+    app.run(host='0.0.0.0', debug=os.getenv('FLASK_DEBUG', False))
