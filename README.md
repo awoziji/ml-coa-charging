@@ -26,14 +26,34 @@ The model is then exposed as an API for our systems to call. The API takes in th
 
 The model is a neural network trained in Tensorflow. 
 
-It uses a convolutional structure to process the invoice description (header and line descriptions are concatenated together), where the filters act as feature extractors for 1 to 4 ngrams. The descriptions go through an embedding layer, converting each description into a sequence of word embeddings. The convolutional filters would hence be detecting the meanings of 1 to 4 word combinations. The convolutional layers are then concatenated and flattened.
+### Invoice Descriptions
 
-The vendor names go through the same embedding layer and convolutional structure as the invoice descriptions and are processed the same way.
+The invoice descriptions are represented as sequences of word embeddings; word embeddings capture the meanings of the words. Each word is represented as a numeric vector, such that semantic meanings of words are preserved. For instance, a well-trained word embedding understands such logic as "king is to queen as man is to woman".
+
+Instead of training the embedding layer from scratch, we will use a pre-trained word embedding like GloVe or word2vec to initialise the weights of the embedding layer, and then continue to train it using our own text.
+
+![Word Embeddings](img/word-embedding.png?raw=true)
+
+The sequences of embeddings are then passed through several convolutional layers, which act as detectors for specific combinations of (meanings of) words. Each convolutional filter looks for a specific meaning of a word/word combination; for instance, one filter with a height of 1 could be looking for the word that has a similar meaning to "singtel", and another filter with a height of 2 could be looking for 2 words, with similar meaning to "singtel invoice". 
+
+By stacking many of these convolutions together, we are essentially looking for various words and word combinations throughout the invoice descriptions.
+
+![Text Convolution](img/cnn-on-text.png?raw=true)
+
+### Vendor Names
+
+The vendor names are processed in the same way as the invoice descriptions, and also go through convolutional layers to detect keywords and key phrases in the vendor names.
+
+### Invoice Amounts
 
 The invoice amounts just go through a batch normalisation layer.
 
+### Model Structure
+
 These "preprocessed" or feature extracted features are then concatenated together and fed to a softmax layer to generate the prediction.
+
+![Model Structure](img/model-structure.png?raw=true)
 
 ## Additional Details
 
-Material design files are put in the `static` folder because this application is meant to be deployed in an intranet environment. These files are only used in a simple web frontend meant for demo purposes. The frontend is strictly speaking not required to deploy the model into production; only the `predict` API is required.
+Material design files are put in the `static` folder because this application is meant to be deployed in an intranet environment, assuming no intranet content delivery network (CDN) to serve these files. These files are only used in a simple web frontend meant for demo purposes. The frontend is strictly speaking not required to deploy the model into production; only the `predict` API is required.
