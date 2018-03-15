@@ -54,7 +54,7 @@ The invoice amounts just go through a batch normalisation layer.
 
 ### Model Structure
 
-These "preprocessed" or feature extracted features are then concatenated together and fed to a softmax layer to generate the prediction.
+These "preprocessed" features are then concatenated together and fed to a softmax layer to generate the prediction.
 
 ![Model Structure](img/model-structure.png?raw=true)
 
