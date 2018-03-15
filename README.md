@@ -34,11 +34,15 @@ Instead of training the embedding layer from scratch, we will use a pre-trained 
 
 ![Word Embeddings](img/word-embedding.png?raw=true)
 
+[_Source: Andrew Ng's course on Sequence Models on Coursera_](https://www.coursera.org/learn/nlp-sequence-models)
+
 The sequences of embeddings are then passed through several convolutional layers, which act as detectors for specific combinations of (meanings of) words. Each convolutional filter looks for a specific meaning of a word/word combination; for instance, one filter with a height of 1 could be looking for the word that has a similar meaning to "singtel", and another filter with a height of 2 could be looking for 2 words, with similar meaning to "singtel invoice". 
 
 By stacking many of these convolutions together, we are essentially looking for various words and word combinations throughout the invoice descriptions.
 
 ![Text Convolution](img/cnn-on-text.png?raw=true)
+
+[_Source: Convolutional Neural Networks for Sentence Classification, by Yoon Kim_](https://arxiv.org/pdf/1408.5882.pdf)
 
 ### Vendor Names
 
