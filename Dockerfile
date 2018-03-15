@@ -1,10 +1,12 @@
 FROM centos:7
 
+COPY app.py /app/app.py
+COPY helpers.py /app/helpers.py
 COPY data/misc/acc_mapping.feather /app/data/misc/acc_mapping.feather
 COPY data/misc/tokenizer.pickle /app/data/misc/tokenizer.pickle
 COPY ["model/model 2018-03-09 1424.h5", "/app/model/model 2018-03-09 1424.h5"]
-COPY app.py /app/app.py
-COPY helpers.py /app/helpers.py
+COPY templates/index.html /app/templates/index.html
+COPY static /app/static
 
 RUN yum -y update && \
 	yum -y install yum-utils && \
