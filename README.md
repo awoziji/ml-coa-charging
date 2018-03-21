@@ -30,7 +30,7 @@ The model is a neural network trained in Tensorflow.
 
 The invoice descriptions are represented as sequences of word embeddings; word embeddings capture the meanings of the words. Each word is represented as a numeric vector, such that semantic meanings of words are preserved. For instance, a well-trained word embedding understands such logic as "king is to queen as man is to woman".
 
-Instead of training the embedding layer from scratch, we will use a pre-trained word embedding like GloVe or word2vec to initialise the weights of the embedding layer, and then continue to train it using our own text.
+Instead of training the embedding layer from scratch which requires way more data, we will use a pre-trained word embedding like GloVe or word2vec to initialise the weights of the embedding layer, and then continue to train it using our own text.
 
 ![Word Embeddings](img/word-embedding.png?raw=true)
 
@@ -42,7 +42,7 @@ By stacking many of these convolutions together, we are essentially looking for 
 
 ![Text Convolution](img/cnn-on-text.png?raw=true)
 
-[_Source: Convolutional Neural Networks for Sentence Classification, by Yoon Kim_](https://arxiv.org/pdf/1408.5882.pdf)
+[_Source: Convolutional Neural Networks for Sentence Classification, by Yoon Kim_](https://arxiv.org/abs/1408.5882)
 
 ### Vendor Names
 
