@@ -28,15 +28,17 @@ acc_indices, acc_index_to_code, acc_index_to_descr = gen_acc_mappings(acc_mappin
 
 app = Flask(__name__)
 
+
 @app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
 
+
 @app.route('/predict', methods=['POST'])
 def predict():
-    #dat = request.get_json()
+    # dat = request.get_json()
     dat = request.form
-    
+
     # preprocess data
     header_descr = dat['headerDescription']
     line_descr = dat['lineDescription']
@@ -45,7 +47,7 @@ def predict():
     vendor_name = dat['vendorName']
     vendor_name = convert_text_to_seq(tokenizer, [vendor_name], max_vendor_length)
     try:
-        payment_voucher_amt = np.reshape(float(dat['amount']), (1,1))
+        payment_voucher_amt = np.reshape(float(dat['amount']), (1, 1))
     except ValueError as e:
         return jsonify({
             'Account Code': '',
@@ -60,23 +62,24 @@ def predict():
             'Prediction Confidence': '',
             'Error': 'Unhandled exception:\n{}'.format(e)
         })
-    
+
     # need graph.as_default() to avoid "Tensor is not an element of this graph" issue when serving on Flask
     with graph.as_default():
         pred = model.predict([full_descr, vendor_name, payment_voucher_amt])[0]
-    
+
     pred_acc_code = get_acc_code(acc_index_to_code, pred)
     pred_acc_descr = get_acc_descr(acc_index_to_descr, pred)
     pred_confidence = get_pred_confidence(pred)
-    
+
     return jsonify({
         'Account Code': pred_acc_code,
         'Account Description': pred_acc_descr,
         'Prediction Confidence': '{}%'.format(round(pred_confidence * 100, 2))
     })
 
+
 if __name__ == '__main__':
     # running on 0.0.0.0 will expose the app beyond localhost
-    # debug flag is set to False if deploying to production; on dev env 
+    # debug flag is set to False if deploying to production; on dev env
     # we can set FLASK_DEBUG to True for debugging purposes
     app.run(host='0.0.0.0', debug=os.getenv('FLASK_DEBUG', False))
