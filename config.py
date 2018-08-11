@@ -21,7 +21,7 @@ RAW_DATA_COLS = [
     'Payment Voucher Line Amount S$ (Excluding GST, Including Freight S$)'
 ]
 RENAMED_COLS = [
-    'fy',
+    'fiscal_year',
     'business_unit',
     'acc_code',
     'acc_descr',
@@ -38,8 +38,8 @@ RENAMED_COLS = [
 STRING_COLS = [
     'voucher_descr', 'voucher_line_descr', # features
     'acc_code', # label
-    'fy', 'business_unit', 'vendor_id', 'voucher_id', 'voucher_line' # passthrough
+    'fiscal_year', 'business_unit', 'vendor_id', 'voucher_id', 'voucher_line' # passthrough
 ] # includes passthrough and label cols if applicable
 NUMERIC_COLS = [] # includes passthrough and label cols if applicable
 LABEL_COL = 'acc_code'
-PASSTHROUGH_COLS = ['fy', 'business_unit', 'vendor_id', 'voucher_id', 'voucher_line']
+PASSTHROUGH_COLS = ['fiscal_year', 'business_unit', 'vendor_id', 'voucher_id', 'voucher_line']
