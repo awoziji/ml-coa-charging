@@ -99,6 +99,7 @@ ENV/
 .mypy_cache/
 
 # sensitive and big files
-/data
+/data/*
 /logs
 /old
+model_trained/*
