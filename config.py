@@ -42,4 +42,4 @@ STRING_COLS = [
 ] # includes passthrough and label cols if applicable
 NUMERIC_COLS = [] # includes passthrough and label cols if applicable
 LABEL_COL = 'acc_code'
-PASSTRHOUGH_COLS = ['business_unit', 'vendor_id', 'voucher_id', 'voucher_line']
+PASSTHROUGH_COLS = ['business_unit', 'vendor_id', 'voucher_id', 'voucher_line']
