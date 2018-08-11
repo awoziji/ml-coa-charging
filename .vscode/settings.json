@@ -1,6 +1,5 @@
 {
     "python.jediEnabled": false,
-    "python.pythonPath": "C:\\Users\\agdba\\Anaconda3\\python.exe",
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": false,
     "python.linting.flake8Enabled": true,
