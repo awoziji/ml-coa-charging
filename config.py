@@ -36,8 +36,9 @@ RENAMED_COLS = [
     'payment_voucher_amt'
 ]
 STRING_COLS = [
-    'voucher_descr', 'voucher_line_descr',
-    'business_unit', 'vendor_id', 'voucher_id', 'voucher_line'
+    'voucher_descr', 'voucher_line_descr', # features
+    'acc_code', # label
+    'business_unit', 'vendor_id', 'voucher_id', 'voucher_line' # passthrough
 ] # includes passthrough and label cols if applicable
 NUMERIC_COLS = [] # includes passthrough and label cols if applicable
 LABEL_COL = 'acc_code'
