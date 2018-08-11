@@ -104,7 +104,7 @@ def make_serving_input_fn(args):
         
         if len(PASSTHROUGH_COLS) > 0:
             for col in PASSTHROUGH_COLS:
-                features[col] = tf.identity(feature_placeholders[col])
+                features[col] = tf.expand_dims(tf.identity(feature_placeholders[col]), axis=1)
         
         return tf.estimator.export.ServingInputReceiver(features, feature_placeholders)
     
