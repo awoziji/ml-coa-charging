@@ -1,0 +1,21 @@
+{
+    "signature_name": "predict",
+    "instances": [
+        {
+            "voucher_descr": "hello hello", 
+            "voucher_line_descr": "it's a place called vertigo",
+            "business_unit": "BU01", 
+            "vendor_id": "B0123", 
+            "voucher_id": "V214790", 
+            "voucher_line": "1"
+        },
+        {
+            "voucher_descr": "bye", 
+            "voucher_line_descr": "the quick brown fox jumps over a lazy dog",
+            "business_unit": "BU01", 
+            "vendor_id": "B0123", 
+            "voucher_id": "V214790", 
+            "voucher_line": "1"
+        }
+    ]
+}
