@@ -1,6 +1,44 @@
 # Cloud Setup
 REGION = 'asia-east1'
-BUCKET = '{BUCKET}'
-PROJECT = '{PROJECT}'
+PROJECT = 'coa-charging'
+BUCKET = PROJECT
 
 DELIM = '<|>'
+
+RAW_DATA_COLS = [
+    'Fiscal Year (Accounting Date)',
+    'Business Unit',
+    'Account Code',
+    'Account Description',
+    'Voucher ID',
+    'Voucher Description',
+    'Voucher Origin',
+    'Vendor ID',
+    'Vendor First Name',
+    'Voucher Line',
+    'Voucher Line Description',
+    'Voucher Line Long Description',
+    'Payment Voucher Line Amount S$ (Excluding GST, Including Freight S$)'
+]
+RENAMED_COLS = [
+    'fy',
+    'business_unit',
+    'acc_code',
+    'acc_descr',
+    'voucher_id',
+    'voucher_descr',
+    'voucher_origin',
+    'vendor_id',
+    'vendor_name',
+    'voucher_line',
+    'voucher_line_descr',
+    'voucher_line_long_descr',
+    'payment_voucher_amt'
+]
+STRING_COLS = [
+    'voucher_descr', 'voucher_line_descr',
+    'business_unit', 'vendor_id', 'voucher_id', 'voucher_line'
+] # includes passthrough and label cols if applicable
+NUMERIC_COLS = [] # includes passthrough and label cols if applicable
+LABEL_COL = 'acc_code'
+PASSTRHOUGH_COLS = ['business_unit', 'vendor_id', 'voucher_id', 'voucher_line']
