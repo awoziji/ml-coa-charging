@@ -3,7 +3,7 @@ REGION = 'asia-east1'
 PROJECT = 'coa-charging'
 BUCKET = PROJECT
 
-DELIM = '<|>'
+DELIM = '<SEP>'
 
 RAW_DATA_COLS = [
     'Fiscal Year (Accounting Date)',
@@ -38,8 +38,8 @@ RENAMED_COLS = [
 STRING_COLS = [
     'voucher_descr', 'voucher_line_descr', # features
     'acc_code', # label
-    'business_unit', 'vendor_id', 'voucher_id', 'voucher_line' # passthrough
+    'fy', 'business_unit', 'vendor_id', 'voucher_id', 'voucher_line' # passthrough
 ] # includes passthrough and label cols if applicable
 NUMERIC_COLS = [] # includes passthrough and label cols if applicable
 LABEL_COL = 'acc_code'
-PASSTHROUGH_COLS = ['business_unit', 'vendor_id', 'voucher_id', 'voucher_line']
+PASSTHROUGH_COLS = ['fy', 'business_unit', 'vendor_id', 'voucher_id', 'voucher_line']
