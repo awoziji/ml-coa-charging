@@ -12,7 +12,7 @@ import tensorflow_hub as hub
 import apache_beam as beam
 import shutil
 import os
-from config import REGION, BUCKET, PROJECT, LABEL_COL, PASSTHROUGH_COLS, STRING_COLS, NUMERIC_COLS
+from config import REGION, BUCKET, PROJECT, LABEL_COL, PASSTHROUGH_COLS, STRING_COLS, NUMERIC_COLS, DELIM, RENAMED_COLS
 print(tf.__version__)
 tf.logging.set_verbosity(tf.logging.INFO)
 
@@ -66,7 +66,8 @@ def build_estimator(model_dir, model_type, embedding_type, learning_rate,
         )
     else:
         raise InputErorr('Model type must be one of "linear" or "dnn"')
-        
+    
+    # enable feature passthrough for matching results to input
     if len(PASSTHROUGH_COLS) > 0:
         estimator = tf.contrib.estimator.forward_features(estimator, PASSTHROUGH_COLS)
 
@@ -102,6 +103,7 @@ def make_serving_input_fn(args):
             feature_placeholders
         )
         
+        # so that outputs are consistently in lists
         if len(PASSTHROUGH_COLS) > 0:
             for col in PASSTHROUGH_COLS:
                 features[col] = tf.expand_dims(tf.identity(feature_placeholders[col]), axis=1)
@@ -113,6 +115,7 @@ def make_serving_input_fn(args):
 
 # training, eval and test input function
 def read_dataset(args, mode):
+    tfrecord_options = tf.python_io.TFRecordOptions(compression_type=tf.python_io.TFRecordCompressionType.GZIP)
     batch_size = args['train_batch_size']
     if mode == tf.estimator.ModeKeys.TRAIN:
         input_paths = args['train_data_paths']
@@ -137,6 +140,18 @@ def read_dataset(args, mode):
 
 # create tf.estimator train and evaluate function
 def train_and_evaluate(args):
+    # figure out train steps based on no. of epochs, no. of rows in dataset and batch size
+    tfrecord_options = tf.python_io.TFRecordOptions(compression_type=tf.python_io.TFRecordCompressionType.GZIP)
+    nrows = sum(
+        sum(1 for _ in tf.python_io.tf_record_iterator(f, options=tfrecord_options)) 
+        for f in tf.gfile.Glob(args['train_data_paths'])
+    )
+    num_epochs = args['num_epochs']
+    batch_size = args['train_batch_size']
+    if batch_size > nrows:
+        batch_size = nrows
+    max_steps = num_epochs * nrows / batch_size
+    
     # modify according to build_estimator function
     estimator = build_estimator(
         args['model_dir'],
@@ -151,7 +166,7 @@ def train_and_evaluate(args):
     
     train_spec = tf.estimator.TrainSpec(
         input_fn=read_dataset(args, tf.estimator.ModeKeys.TRAIN),
-        max_steps=args['train_steps']
+        max_steps=max_steps
     )
     
     exporter = tf.estimator.LatestExporter('exporter', make_serving_input_fn(args))
@@ -164,7 +179,28 @@ def train_and_evaluate(args):
     
     tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
     
-    
+    # export results
+    if not os.path.exists('data/output'):
+        os.mkdir('data/output')
+    eval_preds = pd.DataFrame(list(estimator.predict(input_fn=read_dataset(args, tf.estimator.ModeKeys.EVAL))))
+    probabilities = list(list(arr) for arr in eval_preds['probabilities']) # pandas is weird with how it stores arrays
+    with tf.Session() as sess:
+        eval_preds['probability'] = sess.run(tf.reduce_max(probabilities, reduction_indices=[1]))
+    eval_preds['pred_' + LABEL_COL] = eval_preds['classes'].map(lambda x: x[0]) # predictions come in a list per row
+    eval_preds = eval_preds[['pred_' + LABEL_COL, 'probability']]
+    raw_eval_df = pd.concat([
+        pd.read_csv(f, sep=DELIM, names=RENAMED_COLS)
+        for f in tf.gfile.Glob('data/split/eval*.csv')], 
+        axis=0, ignore_index=True)
+    cols = list(raw_eval_df.columns)
+    cols.remove(LABEL_COL)
+    raw_eval_df = raw_eval_df[cols + [LABEL_COL]]
+    for col in ['pred_' + LABEL_COL, 'probability']:
+        raw_eval_df[col] = eval_preds[col]
+    raw_eval_df['wrong'] = (raw_eval_df['pred_' + LABEL_COL] != raw_eval_df[LABEL_COL]).astype(int)
+    raw_eval_df.to_excel('data/output/eval_with_preds.xlsx', index=False)
+
+
 def gzip_reader_fn():
     return tf.TFRecordReader(options=tf.python_io.TFRecordOptions(
         compression_type=tf.python_io.TFRecordCompressionType.GZIP))
