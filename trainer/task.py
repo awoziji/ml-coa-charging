@@ -105,6 +105,12 @@ if __name__ == '__main__':
         type=float
     )
     parser.add_argument(
+        '--embedding_trainable',
+        help='Is embedding column from TFHub trainable? e.g. True',
+        default=False,
+        type=bool
+    )
+    parser.add_argument(
         '--l1_regularization_strength',
         help='L1 regularisation strength; controls how sparse the linear model will be',
         default=0.01,

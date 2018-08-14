@@ -14,7 +14,7 @@ RAW_DATA_COLS = [
     'Voucher Description',
     'Voucher Origin',
     'Vendor ID',
-    'Vendor First Name',
+    'Vendor Name',
     'Voucher Line',
     'Voucher Line Description',
     'Voucher Line Long Description',
@@ -41,5 +41,8 @@ STRING_COLS = [
     'fiscal_year', 'business_unit', 'vendor_id', 'voucher_id', 'voucher_line' # passthrough
 ] # includes passthrough and label cols if applicable
 NUMERIC_COLS = [] # includes passthrough and label cols if applicable
+TOKENIZE_COL = 'voucher_full_descr'
+NGRAM_RANGE = (1, 3)
+MAX_TOKENS = 2000
 LABEL_COL = 'acc_code'
 PASSTHROUGH_COLS = ['fiscal_year', 'business_unit', 'vendor_id', 'voucher_id', 'voucher_line']

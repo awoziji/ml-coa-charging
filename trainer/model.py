@@ -2,6 +2,10 @@
 
 
 from __future__ import print_function, division, absolute_import # python 2 compatibility
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
+
 import pandas as pd
 import tensorflow as tf
 import tensorflow.contrib.learn as tflearn
@@ -12,16 +16,17 @@ import tensorflow_hub as hub
 import apache_beam as beam
 import shutil
 import os
-from config import REGION, BUCKET, PROJECT, LABEL_COL, PASSTHROUGH_COLS, STRING_COLS, NUMERIC_COLS, DELIM, RENAMED_COLS
+from config import REGION, BUCKET, PROJECT, LABEL_COL, PASSTHROUGH_COLS, STRING_COLS, NUMERIC_COLS, DELIM, RENAMED_COLS, TOKENIZE_COL, MAX_TOKENS
 print(tf.__version__)
 tf.logging.set_verbosity(tf.logging.INFO)
 
-LABEL_VOCABULARY = ['123456', '123457', '123458']
-N_CLASSES = len(LABEL_VOCABULARY)
+with open('data/misc/labels.txt', 'r') as f:
+    LABEL_VOCABULARY = f.readline().split(DELIM)
+    N_CLASSES = len(LABEL_VOCABULARY)
 
 
 def build_estimator(model_dir, model_type, embedding_type, learning_rate,
-                    hidden_units, dropout,
+                    hidden_units, dropout, embedding_trainable,
                     l1_regularization_strength, l2_regularization_strength):
   
     if embedding_type == 'nnlm':
@@ -30,17 +35,22 @@ def build_estimator(model_dir, model_type, embedding_type, learning_rate,
         module_url = 'https://tfhub.dev/google/universal-sentence-encoder/2'
     elif embedding_type == 'elmo':
         module_url = 'https://tfhub.dev/google/elmo/2'
+    elif embedding_type == 'word2vec':
+        module_url = 'https://tfhub.dev/google/Wiki-words-500-with-normalization/1'
     elif embedding_type is None:
         pass
     else:
-        raise InputError('Embedding type must be one of "nnlm", "universal-sentence-encoder", "elmo", None')
+        raise InputError('Embedding type must be one of "nnlm", "universal-sentence-encoder", "elmo", "word2vec", None')
     
     if embedding_type is not None:
-        embedding = hub.text_embedding_column('voucher_full_descr', module_url, trainable=False)
-        
-    feature_columns = [embedding]
+        embedding = hub.text_embedding_column('voucher_full_descr', module_url, trainable=embedding_trainable)
+    
+    bow_indices = tf.feature_column.categorical_column_with_identity('bow_indices', num_buckets=MAX_TOKENS+1)
+    weighted_bow = tf.feature_column.weighted_categorical_column(bow_indices, 'bow_weight')
     
     if model_type == 'linear':
+        feature_columns = [weighted_bow]
+        
         estimator = tf.estimator.LinearClassifier(
             feature_columns=feature_columns,
             n_classes=N_CLASSES,
@@ -53,6 +63,8 @@ def build_estimator(model_dir, model_type, embedding_type, learning_rate,
             )
         )
     elif model_type == 'dnn':
+        feature_columns = [embedding]
+        
         estimator = tf.estimator.DNNClassifier(
             feature_columns=feature_columns,
             hidden_units=hidden_units,
@@ -62,10 +74,33 @@ def build_estimator(model_dir, model_type, embedding_type, learning_rate,
             optimizer=tf.train.AdamOptimizer(
                 learning_rate=learning_rate,
             ),
-            dropout=dropout
+            dropout=dropout,
+            batch_norm=True
+        )
+    elif model_type == 'dnn-linear-combined':
+        dnn_features = [embedding]
+        linear_features = [weighted_bow]
+        
+        estimator = tf.estimator.DNNLinearCombinedClassifier(
+            linear_feature_columns=linear_features,
+            linear_optimizer=tf.train.FtrlOptimizer(
+                learning_rate=learning_rate,
+                l1_regularization_strength=l1_regularization_strength,
+                l2_regularization_strength=l2_regularization_strength
+            ),
+            dnn_feature_columns=dnn_features,
+            dnn_optimizer=tf.train.AdamOptimizer(
+                learning_rate=learning_rate,
+            ),
+            dnn_dropout=dropout,
+            dnn_hidden_units=hidden_units,
+            n_classes=N_CLASSES,
+            label_vocabulary=LABEL_VOCABULARY,
+            model_dir=model_dir,
+            batch_norm=True
         )
     else:
-        raise InputErorr('Model type must be one of "linear" or "dnn"')
+        raise InputErorr('Model type must be one of "linear", "dnn" or "dnn-linear-combined"')
     
     # enable feature passthrough for matching results to input
     if len(PASSTHROUGH_COLS) > 0:
@@ -115,7 +150,6 @@ def make_serving_input_fn(args):
 
 # training, eval and test input function
 def read_dataset(args, mode):
-    tfrecord_options = tf.python_io.TFRecordOptions(compression_type=tf.python_io.TFRecordCompressionType.GZIP)
     batch_size = args['train_batch_size']
     if mode == tf.estimator.ModeKeys.TRAIN:
         input_paths = args['train_data_paths']
@@ -160,13 +194,21 @@ def train_and_evaluate(args):
         args['learning_rate'],
         args['hidden_units'].split(' '),
         args['dropout'],
+        args['embedding_trainable'],
         args['l1_regularization_strength'],
         args['l2_regularization_strength']
     )
     
+    os.makedirs('./model_trained/eval')
+    early_stopping = tf.contrib.estimator.stop_if_no_decrease_hook(
+        estimator,
+        metric_name='loss',
+        max_steps_without_decrease=3 * nrows / batch_size
+    )
     train_spec = tf.estimator.TrainSpec(
         input_fn=read_dataset(args, tf.estimator.ModeKeys.TRAIN),
-        max_steps=max_steps
+        max_steps=max_steps,
+        hooks=[early_stopping]
     )
     
     exporter = tf.estimator.LatestExporter('exporter', make_serving_input_fn(args))
