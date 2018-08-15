@@ -43,6 +43,6 @@ STRING_COLS = [
 NUMERIC_COLS = [] # includes passthrough and label cols if applicable
 TOKENIZE_COL = 'voucher_full_descr'
 NGRAM_RANGE = (1, 3)
-MAX_TOKENS = 2000
+MAX_TOKENS = 1500
 LABEL_COL = 'acc_code'
 PASSTHROUGH_COLS = ['fiscal_year', 'business_unit', 'vendor_id', 'voucher_id', 'voucher_line']
