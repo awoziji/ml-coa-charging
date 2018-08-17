@@ -12,6 +12,8 @@ import tensorflow.contrib.learn as tflearn
 import tensorflow.contrib.metrics as metrics
 from tensorflow_transform.saved import input_fn_maker, saved_transform_io
 from tensorflow_transform.tf_metadata import metadata_io
+from tensorflow_transform.beam.tft_beam_io import beam_metadata_io
+import tensorflow_model_analysis as tfma
 import tensorflow_hub as hub
 import apache_beam as beam
 import shutil
@@ -44,6 +46,7 @@ def build_estimator(model_dir, model_type, embedding_type, learning_rate,
     
     if embedding_type is not None:
         embedding = hub.text_embedding_column('voucher_full_descr', module_url, trainable=embedding_trainable)
+        vendor_embedding = hub.text_embedding_column('vendor_name', module_url, trainable=embedding_trainable)
     
     bow_indices = tf.feature_column.categorical_column_with_identity('bow_indices', num_buckets=MAX_TOKENS+1)
     weighted_bow = tf.feature_column.weighted_categorical_column(bow_indices, 'bow_weight')
@@ -63,7 +66,7 @@ def build_estimator(model_dir, model_type, embedding_type, learning_rate,
             )
         )
     elif model_type == 'dnn':
-        feature_columns = [embedding]
+        feature_columns = [embedding, vendor_embedding]
         
         estimator = tf.estimator.DNNClassifier(
             feature_columns=feature_columns,
@@ -78,7 +81,7 @@ def build_estimator(model_dir, model_type, embedding_type, learning_rate,
             batch_norm=True
         )
     elif model_type == 'dnn-linear-combined':
-        dnn_features = [embedding]
+        dnn_features = [embedding, vendor_embedding]
         linear_features = [weighted_bow]
         
         estimator = tf.estimator.DNNLinearCombinedClassifier(
@@ -144,6 +147,34 @@ def make_serving_input_fn(args):
                 features[col] = tf.expand_dims(tf.identity(feature_placeholders[col]), axis=1)
         
         return tf.estimator.export.ServingInputReceiver(features, feature_placeholders)
+    
+    return _input_fn
+
+
+def make_eval_input_fn(args):
+    transform_savedmodel_dir = (
+        os.path.join(args['metadata_path'], 'transform_fn'))
+    
+    def _input_fn():
+        metadata = beam_metadata_io.metadata_io.read_metadata('data/tft/metadata/rawdata_metadata/')
+        raw_feature_spec = metadata.schema.as_feature_spec()
+        
+        serialized_tf_example = tf.placeholder(dtype=tf.string, shape=[None], name='input_example_tensor')
+        
+        features = tf.parse_example(serialized_tf_example, raw_feature_spec)
+        
+        _, transformed_features = saved_transform_io.partially_apply_saved_transform(
+            transform_savedmodel_dir,
+            features
+        )
+        
+        receiver_tensors = {'examples': serialized_tf_example}
+        
+        return tfma.export.EvalInputReceiver(
+            features=transformed_features,
+            receiver_tensors=receiver_tensors,
+            labels=transformed_features[LABEL_COL]
+        )
     
     return _input_fn
 
@@ -220,6 +251,12 @@ def train_and_evaluate(args):
     )
     
     tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
+    
+    tfma.export.export_eval_savedmodel(
+        estimator=estimator,
+        export_dir_base=os.path.join(args['model_dir'], 'eval', 'tfma'),
+        eval_input_receiver=make_eval_input_fn(args)
+    )
     
     # export results
     if not os.path.exists('data/output'):
