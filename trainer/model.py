@@ -45,7 +45,7 @@ def build_estimator(model_dir, model_type, embedding_type, learning_rate,
         raise InputError('Embedding type must be one of "nnlm", "universal-sentence-encoder", "elmo", "word2vec", None')
     
     if embedding_type is not None:
-        embedding = hub.text_embedding_column('voucher_full_descr', module_url, trainable=embedding_trainable)
+        embedding = hub.text_embedding_column('full_description', module_url, trainable=embedding_trainable)
         vendor_embedding = hub.text_embedding_column('vendor_name', module_url, trainable=embedding_trainable)
     
     bow_indices = tf.feature_column.categorical_column_with_identity('bow_indices', num_buckets=MAX_TOKENS+1)
@@ -255,7 +255,7 @@ def train_and_evaluate(args):
     tfma.export.export_eval_savedmodel(
         estimator=estimator,
         export_dir_base=os.path.join(args['model_dir'], 'eval', 'tfma'),
-        eval_input_receiver=make_eval_input_fn(args)
+        eval_input_receiver_fn=make_eval_input_fn(args)
     )
     
     # export results

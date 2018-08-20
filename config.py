@@ -6,43 +6,37 @@ BUCKET = PROJECT
 DELIM = '<SEP>'
 
 RAW_DATA_COLS = [
-    'Fiscal Year (Accounting Date)',
+    'Invoice Date',
     'Business Unit',
+    'Invoice Number',
+    'Invoice Line',
+    'Invoice Description',
+    'Invoice Line Description',
+    'Vendor Name',
     'Account Code',
     'Account Description',
-    'Voucher ID',
-    'Voucher Description',
-    'Voucher Origin',
-    'Vendor ID',
-    'Vendor Name',
-    'Voucher Line',
-    'Voucher Line Description',
-    'Voucher Line Long Description',
-    'Payment Voucher Line Amount S$ (Excluding GST, Including Freight S$)'
+    'Invoice Amount (Base Amount, Excluding GST)'
 ]
 RENAMED_COLS = [
-    'fiscal_year',
+    'invoice_date',
     'business_unit',
+    'invoice_number',
+    'line_number',
+    'header_description',
+    'line_description',
+    'vendor_name',
     'acc_code',
     'acc_descr',
-    'voucher_id',
-    'voucher_descr',
-    'voucher_origin',
-    'vendor_id',
-    'vendor_name',
-    'voucher_line',
-    'voucher_line_descr',
-    'voucher_line_long_descr',
-    'payment_voucher_amt'
+    'amount'
 ]
 STRING_COLS = [
-    'voucher_descr', 'voucher_line_descr', 'vendor_name', # features
+    'header_description', 'line_description', 'vendor_name', # features
     'acc_code', # label
-    'fiscal_year', 'business_unit', 'vendor_id', 'voucher_id', 'voucher_line' # passthrough
+    'invoice_date', 'invoice_number', 'business_unit' # passthrough
 ] # includes passthrough and label cols if applicable
-NUMERIC_COLS = [] # includes passthrough and label cols if applicable
-TOKENIZE_COL = 'voucher_full_descr'
+NUMERIC_COLS = ['line_number'] # includes passthrough and label cols if applicable
+TOKENIZE_COL = 'full_description'
 NGRAM_RANGE = (1, 3)
 MAX_TOKENS = 1500
 LABEL_COL = 'acc_code'
-PASSTHROUGH_COLS = ['fiscal_year', 'business_unit', 'vendor_id', 'voucher_id', 'voucher_line']
+PASSTHROUGH_COLS = ['invoice_date', 'invoice_number', 'business_unit', 'line_number']
