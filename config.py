@@ -34,7 +34,7 @@ STRING_COLS = [
     'acc_code', # label
     'invoice_date', 'invoice_number', 'business_unit' # passthrough
 ] # includes passthrough and label cols if applicable
-NUMERIC_COLS = ['line_number'] # includes passthrough and label cols if applicable
+NUMERIC_COLS = ['line_number', 'amount'] # includes passthrough and label cols if applicable
 TOKENIZE_COL = 'full_description'
 NGRAM_RANGE = (1, 3)
 MAX_TOKENS = 1500
