@@ -2,20 +2,24 @@
     "signature_name": "predict",
     "instances": [
         {
-            "voucher_descr": "hello hello", 
-            "voucher_line_descr": "it's a place called vertigo",
-            "business_unit": "BU01", 
-            "vendor_id": "B0123", 
-            "voucher_id": "V214790", 
-            "voucher_line": "1"
+            "vendor_name": "some vendor name",
+            "invoice_number": "Invoice1",
+            "invoice_date": "DD/MM/YYYY",
+            "business_unit": "BU01",
+            "header_description": "some header description",
+            "line_number": 1.0,
+            "line_description": "some line description",
+            "amount": 123.45
         },
         {
-            "voucher_descr": "bye", 
-            "voucher_line_descr": "the quick brown fox jumps over a lazy dog",
-            "business_unit": "BU01", 
-            "vendor_id": "B0123", 
-            "voucher_id": "V214790", 
-            "voucher_line": "1"
+            "vendor_name": "some vendor name",
+            "invoice_number": "Invoice1",
+            "invoice_date": "DD/MM/YYYY",
+            "business_unit": "BU01",
+            "header_description": "some header description",
+            "line_number": 1.0,
+            "line_description": "some line description",
+            "amount": 123.45
         }
     ]
 }
