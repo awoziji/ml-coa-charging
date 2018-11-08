@@ -39,4 +39,4 @@ TOKENIZE_COL = 'full_description'
 NGRAM_RANGE = (1, 3)
 MAX_TOKENS = 1500
 LABEL_COL = 'acc_code'
-PASSTHROUGH_COLS = ['invoice_date', 'invoice_number', 'business_unit', 'line_number']
+PASSTHROUGH_COLS = ['invoice_date', 'invoice_number', 'business_unit', 'line_number', 'vendor_name']

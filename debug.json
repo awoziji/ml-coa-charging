@@ -9,7 +9,7 @@
             "header_description": "some header description",
             "line_number": 1.0,
             "line_description": "some line description",
-            "amount": 123.45
+            "amount": 123.0
         },
         {
             "vendor_name": "some vendor name",
@@ -19,7 +19,7 @@
             "header_description": "some header description",
             "line_number": 1.0,
             "line_description": "some line description",
-            "amount": 123.45
+            "amount": 1
         }
     ]
 }

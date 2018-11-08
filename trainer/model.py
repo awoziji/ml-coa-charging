@@ -51,6 +51,9 @@ def build_estimator(model_dir, model_type, embedding_type, learning_rate,
     bow_indices = tf.feature_column.categorical_column_with_identity('bow_indices', num_buckets=MAX_TOKENS+1)
     weighted_bow = tf.feature_column.weighted_categorical_column(bow_indices, 'bow_weight')
     
+    business_unit = tf.feature_column.categorical_column_with_hash_bucket('real_business_unit', 128)
+    business_unit = tf.feature_column.indicator_column(business_unit)
+    
     if model_type == 'linear':
         feature_columns = [weighted_bow]
         
@@ -66,7 +69,7 @@ def build_estimator(model_dir, model_type, embedding_type, learning_rate,
             )
         )
     elif model_type == 'dnn':
-        feature_columns = [embedding, vendor_embedding]
+        feature_columns = [embedding, vendor_embedding, business_unit]
         
         estimator = tf.estimator.DNNClassifier(
             feature_columns=feature_columns,
@@ -81,7 +84,7 @@ def build_estimator(model_dir, model_type, embedding_type, learning_rate,
             batch_norm=True
         )
     elif model_type == 'dnn-linear-combined':
-        dnn_features = [embedding, vendor_embedding]
+        dnn_features = [embedding, vendor_embedding, business_unit]
         linear_features = [weighted_bow]
         
         estimator = tf.estimator.DNNLinearCombinedClassifier(

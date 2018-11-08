@@ -103,3 +103,4 @@ ENV/
 /logs
 /old
 model_trained/*
+eval/*
