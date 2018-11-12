@@ -18,7 +18,7 @@ import tensorflow_hub as hub
 import apache_beam as beam
 import shutil
 import os
-from config import REGION, BUCKET, PROJECT, LABEL_COL, PASSTHROUGH_COLS, STRING_COLS, NUMERIC_COLS, DELIM, RENAMED_COLS, TOKENIZE_COL, MAX_TOKENS
+from config import REGION, BUCKET, PROJECT, LABEL_COL, PASSTHROUGH_COLS, STRING_COLS, FLOAT_COLS, INT_COLS, DELIM, RENAMED_COLS, TOKENIZE_COL, MAX_TOKENS
 print(tf.__version__)
 tf.logging.set_verbosity(tf.logging.INFO)
 
@@ -51,8 +51,6 @@ def build_estimator(model_dir, model_type, embedding_type, learning_rate,
     bow_indices = tf.feature_column.categorical_column_with_identity('bow_indices', num_buckets=MAX_TOKENS+1)
     weighted_bow = tf.feature_column.weighted_categorical_column(bow_indices, 'bow_weight')
     
-    business_unit = tf.feature_column.categorical_column_with_hash_bucket('real_business_unit', 128)
-    business_unit = tf.feature_column.indicator_column(business_unit)
     
     if model_type == 'linear':
         feature_columns = [weighted_bow]
@@ -69,7 +67,7 @@ def build_estimator(model_dir, model_type, embedding_type, learning_rate,
             )
         )
     elif model_type == 'dnn':
-        feature_columns = [embedding, vendor_embedding, business_unit]
+        feature_columns = [embedding, vendor_embedding]
         
         estimator = tf.estimator.DNNClassifier(
             feature_columns=feature_columns,
@@ -84,7 +82,7 @@ def build_estimator(model_dir, model_type, embedding_type, learning_rate,
             batch_norm=True
         )
     elif model_type == 'dnn-linear-combined':
-        dnn_features = [embedding, vendor_embedding, business_unit]
+        dnn_features = [embedding, vendor_embedding]
         linear_features = [weighted_bow]
         
         estimator = tf.estimator.DNNLinearCombinedClassifier(
@@ -135,7 +133,10 @@ def make_serving_input_fn(args):
             column_name: tf.placeholder(tf.string, [None]) for column_name in STRING_COLS
         }
         feature_placeholders.update({
-            column_name: tf.placeholder(tf.float32, [None]) for column_name in NUMERIC_COLS
+            column_name: tf.placeholder(tf.float32, [None]) for column_name in FLOAT_COLS
+        })
+        feature_placeholders.update({
+            column_name: tf.placeholder(tf.int64, [None]) for column_name in INT_COLS
         })
         feature_placeholders.pop(LABEL_COL)
         
