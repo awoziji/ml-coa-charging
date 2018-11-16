@@ -273,7 +273,7 @@ def train_and_evaluate(args):
     eval_preds = eval_preds[['pred_' + LABEL_COL, 'probability']]
     raw_eval_df = pd.concat([
         pd.read_csv(f, sep=DELIM, names=RENAMED_COLS)
-        for f in tf.gfile.Glob('data/split/eval*.csv')], 
+        for f in tf.gfile.Glob('data/split/eval*.tsv')], 
         axis=0, ignore_index=True)
     cols = list(raw_eval_df.columns)
     cols.remove(LABEL_COL)
